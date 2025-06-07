@@ -1103,17 +1103,18 @@ class ChatCohere(BaseChatModel, BaseCohere):
         tool_calls: Optional[List[Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
         """Get the stream info from cohere API response (V2)."""
-        input_tokens = final_delta.usage.billed_units.input_tokens
-        output_tokens = final_delta.usage.billed_units.output_tokens
-        total_tokens = input_tokens + output_tokens
         stream_info = {
             "finish_reason": final_delta.finish_reason,
-            "token_count": {
-                "total_tokens": total_tokens,
+        }
+        if final_delta.usage.billed_units:
+            input_tokens = final_delta.usage.billed_units.input_tokens
+            output_tokens = final_delta.usage.billed_units.output_tokens
+            total_tokens = input_tokens + output_tokens
+            stream_info["token_count"] = {
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
-            },
-        }
+                "total_tokens": total_tokens,
+            }
         if documents:
             stream_info["documents"] = documents
         if tool_calls:
